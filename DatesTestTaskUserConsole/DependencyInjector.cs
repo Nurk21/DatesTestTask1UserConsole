@@ -24,7 +24,7 @@ namespace DatesTestTaskUserConsole
             });
 
             services.AddHttpClient<IDateService, DateService>("API");
-
+            services.AddScoped<IProcessing, Processing>();
             return services;
         }
     }

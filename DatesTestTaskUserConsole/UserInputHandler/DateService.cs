@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,10 +25,16 @@ namespace DatesTestTaskUserConsole.UserInputHandler
 
         public async Task<List<DatesRangeDTO>> GetIntersection(DateTime from, DateTime to)
         {
-            var content = await _client.GetStringAsync("Dates/GetRanges/?from=2019-10-07&to=2019-10-28");
+            CultureInfo provider = CultureInfo.CurrentCulture;
+            var content = await _client.GetStringAsync($"Dates/GetRanges/?from={from.ToString("yyyy-MM-dd")}&to={to.ToString("yyyy-MM-dd")}");
 
-            var user = JsonConvert.DeserializeObject<List<DatesRangeDTO>>(content);
-            Console.WriteLine(content);
+            var ranges = JsonConvert.DeserializeObject<List<DatesRangeDTO>>(content);
+            foreach(DatesRangeDTO range in ranges)
+            {
+                string a = range.From.ToString("yyyy-MM-dd");
+                string b = range.To.ToString("yyyy-MM-dd");
+                Console.WriteLine($"intersection found with dates ({a} - {b})");
+            }
             return null;
         }
 
@@ -35,10 +42,10 @@ namespace DatesTestTaskUserConsole.UserInputHandler
         {
             DatesRangeDTO period = new DatesRangeDTO(from, to);
             var json = JsonConvert.SerializeObject(period);
-            var data = new StringContent(json, Encoding.UTF8, "application/json");     
-            
+            var data = new StringContent(json, Encoding.UTF8, "application/json");             
             var response = await _client.PostAsync("Dates/AddRange", data);
-            string result = response.Content.ReadAsStringAsync().Result;
+            string result = response.StatusCode.ToString();
+            Console.WriteLine("Status code shows if adding operation was successful");
             Console.WriteLine(result);
         }
     }
